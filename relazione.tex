@@ -1,5 +1,9 @@
 \documentclass{article}
 
+\usepackage{amsmath}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+
 \title{LCDP - Codici correttori}
 \date{14 febbraio 2018}
 \author{Saftoiu Vlad Alexandru}
@@ -13,12 +17,20 @@
 	\tableofcontents
 	\newpage
 
-	\section{Section}
+	\section{Traccia}
+	\begin{enumerate}
+		\item introduzione/descrizione LDPC (e brevissima storia?)
+		\item check matrix sparsa 
+		\item sum-product algorithm
+		\item factor graph
+		\item esempi concreti di impiego di codici correttori LDPC
+	\end{enumerate}
+	\section{Introduzione}
+	Un codice LDPC è un codice ottimo con una buona distanza, a patto di riuscire a costruire un decoder efficiente che, dato l'output $\textbf{r}$ sul canale C, individua la codeword $\textbf{t}$ con la probabilità $P(\textbf{r}|\textbf{t})$ maggiore. Decodificare un codice LDPC è un problema NP-completo, un approcio che possiamo seguire per ottenere un decoder è dato dall'utilizzo dell'algoritmo somme-prodotti a scambio di messaggi.
+	\section{Algoritmo somme-prodotti a scambio di messaggi}
+Obiettivo: trovare $\textbf{x}$ che massimizza $P^*(\textbf{x})=P(\textbf{x})1[\textbf{Hx} = \textbf{z}]'$.
 
-	Dummy text
-
-	\subsection{Subsection}
-
-	Dummy text
-
+Anche conosciuto come \textit{propagation-belief algorithm}, è un algoritmo utilizzato per fare inferenza sulle strutture ad albero (ed in maniera approssimata anche sui grafi) calcolando le probabilità marginali di un modello grafico con N variabili $\bar{x} = (x_1,x_2, x_N)$ a valori su un alfabeto finito $\mathcal{X}$.
+	\subsection{Factor graph}
+	Un \textit{factor graph} è un grafo bipartito che rappresenta la fattorizzazione di una funzione, in particolare viene utilizzato per rappresentare i fattori di una distribuzione di probabilità. In un \textit{factor graph} un fattore che è $0$ oppure $1$ viene chiamato \textit{constraint}.
 \end{document}
