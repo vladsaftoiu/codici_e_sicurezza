@@ -25,12 +25,21 @@
 		\item factor graph
 		\item esempi concreti di impiego di codici correttori LDPC
 	\end{enumerate}
+
 	\section{Introduzione}
 	Un codice LDPC è un codice ottimo con una buona distanza, a patto di riuscire a costruire un decoder efficiente che, dato l'output $\textbf{r}$ sul canale C, individua la codeword $\textbf{t}$ con la probabilità $P(\textbf{r}|\textbf{t})$ maggiore. Decodificare un codice LDPC è un problema NP-completo, un approcio che possiamo seguire per ottenere un decoder è dato dall'utilizzo dell'algoritmo somme-prodotti a scambio di messaggi.
+	
 	\section{Algoritmo somme-prodotti a scambio di messaggi}
-Obiettivo: trovare $\textbf{x}$ che massimizza $P^*(\textbf{x})=P(\textbf{x})1[\textbf{Hx} = \textbf{z}]'$.
-
+Obiettivo: trovare $\textbf{x}$ che massimizza $P^*(\textbf{x})=P(\textbf{x})1[\textbf{Hx} = \textbf{z}]$.
 Anche conosciuto come \textit{propagation-belief algorithm}, è un algoritmo utilizzato per fare inferenza sulle strutture ad albero (ed in maniera approssimata anche sui grafi) calcolando le probabilità marginali di un modello grafico con N variabili $\bar{x} = (x_1,x_2, x_N)$ a valori su un alfabeto finito $\mathcal{X}$.
+	\subsection{Iterazione dell'algoritmo}
+	\begin{itemize}
+		\item $\mathcal{N}(m) := \left\{ n | H_{mn} = 1 \right\}$ l'insieme degli indici di colonna che hanno uno alla riga m.
+		\item $\mathcal{M}(n) := \left\{ m | H_{mn} = 1 \right\}$ l'insieme degli indici di riga che hanno uno alla colonna n.
+		\item $\mathcal{M}(n)\setminus n$ rappresenta l'esclusione del bit n dall'insieme
+		\item $q^x_{mn}$ è la probabilità che il bit $n$ di $\textbf{x}$ abbia il valore $x$
+		\item $r^x_{mn}$ è la probabilità che il check $m$ sia "soddisfatto" se il bit $n$ di $\textbf{x}$ abbia il valore fissato su $x$ e gli altri bits hanno una distribuzione separabile data dalle probabilità $\left\{ q_{mn'} | n' \in \mathcal{N}(m)\setminus n\right\}$
+	\end{itemize}
 	\subsection{Factor graph}
 	Un \textit{factor graph} è un grafo bipartito che rappresenta la fattorizzazione di una funzione, in particolare viene utilizzato per rappresentare i fattori di una distribuzione di probabilità. In un \textit{factor graph} un fattore che è $0$ oppure $1$ viene chiamato \textit{constraint}.
 \end{document}
