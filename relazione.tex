@@ -1,6 +1,8 @@
 \documentclass{article}
 
+\usepackage{bbm}
 \usepackage{amsmath}
+
 \usepackage[italian]{babel}
 \usepackage[utf8]{inputenc}
 
@@ -17,6 +19,7 @@
 	\tableofcontents
 	\newpage
 
+
 	\section{Traccia}
 	\begin{enumerate}
 		\item introduzione/descrizione LDPC (e brevissima storia?)
@@ -27,11 +30,51 @@
 	\end{enumerate}
 
 	\section{Introduzione}
+	Un codice LDPC è un codice a blocchi con una matriche di controllo $\textbf{H}$ sparsa ovvero con "pochi" uno su ogni riga e su ogni colonna. Un codice a blocchi è regolare quando, data una matrice $H \in M_{m \times n}$ elementi in $\left\{0,1\right\}$ si ha che:
+	\begin{equation}
+		  \forall j =1 ... n \quad W_{hamming}(H^j) = J 
+	\end{equation}
+	\begin{equation}
+		\forall i = 1 ... m \quad W_{hamming}(H_i) = K
+	\end{equation}
 	Un codice LDPC è un codice ottimo con una buona distanza, a patto di riuscire a costruire un decoder efficiente che, dato l'output $\textbf{r}$ sul canale C, individua la codeword $\textbf{t}$ con la probabilità $P(\textbf{r}|\textbf{t})$ maggiore. Decodificare un codice LDPC è un problema NP-completo, un approcio che possiamo seguire per ottenere un decoder è dato dall'utilizzo dell'algoritmo somme-prodotti a scambio di messaggi.
+	\subsection{Esempio}
+	Esempio di una matrice per un codice a blocchi generato casualmente con i seguenti paramentri:
+	\begin{itemize}
+		\item lunghezza blocchi $N = 16$
+		\item peso colonne $J  = 3$
+		\item peso righe $K = 4$
+	\end {itemize}
+	La matrice risultante è $H \in M_{12 \times 16}$ elementi in $\left\{0,1\right\}$
+	\begin{equation*}
+		\begin{smallmatrix}
+			1& & & & & &1& &1&1& & & & & &  \\
+			 &1& & & &1& &1& & &1& & & & &  \\
+			1& & & & & & & &1&1& &1& & & &  \\
+			 & & &1& &1& & & & & &1&1& & &  \\
+			 &1& & &1& & & & & & &1&1& & &  \\
+			 &1& & & & &1& & &1& & &1& & &  \\
+			 & & &1& & & &1& & & & & &1& &1 \\
+			 & & & &1& & & &1& &1& & &1& &  \\
+			 & &1&1& & &1& & & & & & &1& &  \\
+			1& & & &1& & & & & & & & & &1&1 \\
+			 & &1& & &1& & & & & & & & &1&1 \\
+			 & &1& & & & &1& & &1& & & &1& 
+		\end{smallmatrix}
+	\end{equation*}
+	Concettualmente ciascuno degli $n$ bit partecipa a $J = 3$ degli $m$ checks, mentre ciascuno degli $m$ checks effettua la somma di $K = 4$ bits collegati.
+	Graficamente possiamo rappresentare la matrice di controllo come un grafo bipartito, da una parte tutti i bits e dall'altra tutti i checks.
 	
 	\section{Algoritmo somme-prodotti a scambio di messaggi}
-Obiettivo: trovare $\textbf{x}$ che massimizza $P^*(\textbf{x})=P(\textbf{x})1[\textbf{Hx} = \textbf{z}]$.
-Anche conosciuto come \textit{propagation-belief algorithm}, è un algoritmo utilizzato per fare inferenza sulle strutture ad albero (ed in maniera approssimata anche sui grafi) calcolando le probabilità marginali di un modello grafico con N variabili $\bar{x} = (x_1,x_2, x_N)$ a valori su un alfabeto finito $\mathcal{X}$.
+Anche conosciuto come \textit{propagation-belief algorithm}, è un algoritmo utilizzato per fare inferenza sulle strutture ad albero (ed in maniera approssimata anche sui grafi) calcolando le probabilità marginali di un modello grafico con N variabili $\bar{x} = (x_1,x_2, ..., x_N)$ a valori su un alfabeto finito $\mathcal{X}$.
+Obiettivo: trovare $\textbf{x}$ che massimizza:
+\begin{equation} 
+	P^*(\textbf{x})=P(\textbf{x})\mathbbm{1}[\textbf{Hx} = \textbf{z}]
+\end{equation}
+Ci interessa calcolare la probabilità a posteriori $P(x_n = 1 | \textbf{z}, \textbf{H})$ per ogni bit $x_n$. Nel grafo rappresentante la \textit{parity-check matrix} del nostro codice sono però presenti molti cicli che ci porterebbero a non utilizzare l'algoritmo somme-prodotti per calcolare le probabilità (i risultati sarebbero imprecisi), tuttavia nell'ottica di decodificare la corretta \textit{codeword} non siamo interessati all'esattezza delle probabilità. Il problema da risolvere per la decodifica è trovare 
+\begin{equation}
+\textbf{Hx} = \textbf{0}  mod_2
+\end{equation}
 	\subsection{Iterazione dell'algoritmo}
 	\begin{itemize}
 		\item $\mathcal{N}(m) := \left\{ n | H_{mn} = 1 \right\}$ l'insieme degli indici di colonna che hanno uno alla riga m.
