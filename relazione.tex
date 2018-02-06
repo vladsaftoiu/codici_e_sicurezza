@@ -6,6 +6,8 @@
 \usepackage[italian]{babel}
 \usepackage[utf8]{inputenc}
 
+\usepackage{tkz-graph}
+
 \title{LCDP - Codici correttori}
 \date{14 febbraio 2018}
 \author{Saftoiu Vlad Alexandru}
@@ -46,7 +48,7 @@
 		\item peso righe $K = 4$
 	\end {itemize}
 	La matrice risultante è $H \in M_{12 \times 16}$ elementi in $\left\{0,1\right\}$
-	\begin{equation*}
+	\begin{equation} \label{matrix}
 		\begin{smallmatrix}
 			1& & & & & &1& &1&1& & & & & &  \\
 			 &1& & & &1& &1& & &1& & & & &  \\
@@ -61,12 +63,66 @@
 			 & &1& & &1& & & & & & & & &1&1 \\
 			 & &1& & & & &1& & &1& & & &1& 
 		\end{smallmatrix}
-	\end{equation*}
+	\end{equation}
 	Concettualmente ciascuno degli $n$ bit partecipa a $J = 3$ degli $m$ checks, mentre ciascuno degli $m$ checks effettua la somma di $K = 4$ bits collegati.
-	Graficamente possiamo rappresentare la matrice di controllo come un grafo bipartito, da una parte tutti i bits e dall'altra tutti i checks.
-	\textbf{INSERT FACTOR GRAPH}
-	
-	
+	Graficamente possiamo rappresentare la matrice di controllo come un grafo bipartito, da una parte tutti i bits e dall'altra tutti i checks. Per esempio il grafo associato alla matrice \ref{matrix} è il seguente:
+	\begin{equation*}
+		\begin{tikzpicture}[scale=0.77]
+			\SetUpEdge[lw = 0.2pt, color = gray]
+			\begin{scope}
+				\tikzset{VertexStyle/.append style={rectangle}}
+				\Vertex[L=\textbf{$c_1$},x=2,y=1]{c1}
+				\Vertex[L=$c_2$,x=3.2,y=1]{c2}
+				\Vertex[L=$c_3$,x=4.4,y=1]{c3}
+				\Vertex[L=$c_4$,x=5.6,y=1]{c4}
+				\Vertex[L=$c_5$,x=6.8,y=1]{c5}
+				\Vertex[L=$c_6$,x=8,y=1]{c6}
+				\Vertex[L=$c_7$,x=9.2,y=1]{c7}
+				\Vertex[L=$c_8$,x=10.4,y=1]{c8}
+				\Vertex[L=$c_9$,x=11.6,y=1]{c9}
+				\Vertex[L=$c_{10}$,x=12.8,y=1]{c10}
+				\Vertex[L=$c_{11}$,x=14,y=1]{c11}
+				\Vertex[L=$c_{12}$,x=15.2,y=1]{c12}
+			\end{scope}
+				\Vertex[L=$x_1$,x=1,y=5]{x1}
+				\Vertex[L=$x_2$,x=2,y=5]{x2}
+				\Vertex[L=$x_3$,x=3,y=5]{x3}
+				\Vertex[L=$x_4$,x=4,y=5]{x4}
+				\Vertex[L=$x_5$,x=5,y=5]{x5}
+				\Vertex[L=$x_6$,x=6,y=5]{x6}
+				\Vertex[L=$x_7$,x=7,y=5]{x7}
+				\Vertex[L=$x_8$,x=8,y=5]{x8}
+				\Vertex[L=$x_9$,x=9,y=5]{x9}
+				\Vertex[L=$x_{10}$,x=10,y=5]{x10}
+				\Vertex[L=$x_{11}$,x=11,y=5]{x11}
+				\Vertex[L=$x_{12}$,x=12,y=5]{x12}
+				\Vertex[L=$x_{13}$,x=13,y=5]{x13}
+				\Vertex[L=$x_{14}$,x=14,y=5]{x14}
+				\Vertex[L=$x_{15}$,x=15,y=5]{x15}
+				\Vertex[L=\textbf{$x_{16}$},x=16,y=5]{x16}
+			\begin{scope}
+				\SetUpEdge[lw = 0.6pt, color = blue]
+				\Edge(c1)(x1)\Edge(c1)(x7)\Edge(c1)(x9)\Edge(c1)(x10)
+			\end{scope}
+			\Edge(c2)(x2)\Edge(c2)(x6)\Edge(c2)(x8)\Edge(c2)(x11)
+			\Edge(c3)(x1)\Edge(c3)(x9)\Edge(c3)(x10)\Edge(c3)(x12)
+			\Edge(c4)(x4)\Edge(c4)(x6)\Edge(c4)(x12)\Edge(c4)(x13)
+			\Edge(c5)(x2)\Edge(c5)(x5)\Edge(c5)(x12)\Edge(c5)(x13)
+			\Edge(c6)(x2)\Edge(c6)(x7)\Edge(c6)(x10)\Edge(c6)(x13)
+			\Edge(c7)(x4)\Edge(c7)(x8)\Edge(c7)(x14)
+			\begin{scope}
+				\SetUpEdge[lw = 0.6pt, color = red]
+				\Edge(c7)(x16)\Edge(c10)(x16)\Edge(c11)(x16)
+			\end{scope}
+			\Edge(c8)(x5)\Edge(c8)(x9)\Edge(c8)(x11)\Edge(c8)(x14)
+			\Edge(c9)(x3)\Edge(c9)(x4)\Edge(c9)(x7)\Edge(c9)(x14)
+			\Edge(c10)(x1)\Edge(c10)(x5)\Edge(c10)(x15)
+			\Edge(c11)(x3)\Edge(c11)(x6)\Edge(c11)(x15)\
+			\Edge(c12)(x3)\Edge(c12)(x8)\Edge(c12)(x11)\Edge(c12)(x15)
+		\end{tikzpicture}
+	\end{equation*}
+	Nel grafo viene evidenziato il fatto che un \textit{check} effettua la somma di quattro bits ($c_1$ con i collegamenti blu), e un singolo bit del blocco partecipa a tre \textit{checks} ($x_{16}$ con i collegamenti in rosso).
+
 	\section{Factor graph}
 		Un \textit{factor graph} è un grafo bipartito che rappresenta la fattorizzazione di una funzione, in particolare viene utilizzato per rappresentare i fattori di una distribuzione di probabilità. In un \textit{factor graph} un fattore che è $0$ oppure $1$ viene chiamato \textit{constraint}.
 
@@ -81,7 +137,11 @@ Ci interessa calcolare la probabilità a posteriori $P(x_n = 1 | \textbf{z}, \te
 \begin{equation}
 \textbf{Hx} = \textbf{0}  mod_2
 \end{equation}
-	\subsection{Iterazione dell'algoritmo}
+	\subsection{Generazione matrice}
+	
+	\subsection{Codifica}
+	
+	\subsection{Decodifica}
 	\subsubsection{Terminologia}
 	\begin{itemize}
 		\item $\mathcal{N}(m) := \left\{ n | H_{mn} = 1 \right\}$ l'insieme degli indici di colonna che hanno uno alla riga m.
@@ -122,7 +182,7 @@ Ci interessa calcolare la probabilità a posteriori $P(x_n = 1 | \textbf{z}, \te
 	con $q^v_{n}$ rappresentante la pseudo-probabilità a posteriori per il bit $n$ di assumere il valore $v$ e viene utilizzata per il criterio di arresto, ricordando che stiamo cercando $\textbf{Hx}=\textbf{z}$ e che possiamo interrompere l'algoritmo per un $\hat{\textbf{x}}$ quando ci permette di decodificare correttamente la codeword.
 	Dopo aver aggiornato le probabilità l'algoritmo prosegue con il movimento orizzontale.
 	\subsubsection{Criterio di arresto}
-	Quando $q^1_n >0.5$ per $x_n$ e $H\hat{\textbf{x}}=\textbf{z}$ possiamo interrompere, altrimenti è possibile procedere per altri $i$ iterazioni sollevando un eccezione qualora non si raggiunga un $\hat{\textbf{x}}$ soddisfacente.
+	Quando $q^1_n >0.5$ è possibile valorizzare $\hat{x}_n$ a 1  e verificare se $\textbf{H}\hat{\textbf{x}}=\textbf{z}$: in tal caso possiamo interrompere, altrimenti è procedediamo finché non troviamo $\hat{\textbf{x}}$ soddifacente o per altre $i$ iterazioni, sollevando un eccezione una volta "sforato" tale limite di iterazioni.
 	\subsubsection{Costi}
 	\begin{itemize}
 		\item \textbf{matrice H} - se bruteforce $\approx N^3$
