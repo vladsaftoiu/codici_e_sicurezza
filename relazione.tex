@@ -100,9 +100,13 @@
 				\Vertex[L=$x_{14}$,x=14,y=5]{x14}
 				\Vertex[L=$x_{15}$,x=15,y=5]{x15}
 				\Vertex[L=\textbf{$x_{16}$},x=16,y=5]{x16}
-			\begin{scope}
+			\begin{scope}				
+				\path[every node/.style={sloped,anchor=south,auto=false, color=blue}, every path/.style={line width=0.6pt}]
+				 	(c1)  edge[color=blue] node[above] {$\textbf{H}_{1,1}=1$} (x1)
+				 	(c1)  edge[color=blue] node[below] {$\textbf{H}_{1,10}=1$} (x10);
 				\SetUpEdge[lw = 0.6pt, color = blue]
-				\Edge(c1)(x1)\Edge(c1)(x7)\Edge(c1)(x9)\Edge(c1)(x10)
+				\Edge(c1)(x7)
+				\Edge(c1)(x9)
 			\end{scope}
 			\Edge(c2)(x2)\Edge(c2)(x6)\Edge(c2)(x8)\Edge(c2)(x11)
 			\Edge(c3)(x1)\Edge(c3)(x9)\Edge(c3)(x10)\Edge(c3)(x12)
@@ -112,7 +116,9 @@
 			\Edge(c7)(x4)\Edge(c7)(x8)\Edge(c7)(x14)
 			\begin{scope}
 				\SetUpEdge[lw = 0.6pt, color = red]
-				\Edge(c7)(x16)\Edge(c10)(x16)\Edge(c11)(x16)
+				\path[-, line width=0.6pt] (c7)  edge[color=red] node[sloped,anchor=south,auto=false, above] {$\textbf{H}_{7,16}=1$} (x16);
+				\Edge(c10)(x16)
+				\Edge(c11)(x16)
 			\end{scope}
 			\Edge(c8)(x5)\Edge(c8)(x9)\Edge(c8)(x11)\Edge(c8)(x14)
 			\Edge(c9)(x3)\Edge(c9)(x4)\Edge(c9)(x7)\Edge(c9)(x14)
@@ -121,7 +127,7 @@
 			\Edge(c12)(x3)\Edge(c12)(x8)\Edge(c12)(x11)\Edge(c12)(x15)
 		\end{tikzpicture}
 	\end{equation*}
-	Nel grafo viene evidenziato il fatto che un \textit{check} effettua la somma di quattro bits ($c_1$ con i collegamenti blu), e un singolo bit del blocco partecipa a tre \textit{checks} ($x_{16}$ con i collegamenti in rosso).
+	Nel grafo viene evidenziato il fatto che un \textit{check} effettua la somma di quattro bits ($c_1$ con i collegamenti blu), e un singolo bit del blocco partecipa a tre \textit{checks} ($x_{16}$ con i collegamenti in rosso). Esiste un collegamento tra $c_m$ e $x_n$ quando $\textbf{H}_{mn}=1$
 
 	\section{Factor graph}
 		Un \textit{factor graph} è un grafo bipartito che rappresenta la fattorizzazione di una funzione, in particolare viene utilizzato per rappresentare i fattori di una distribuzione di probabilità. In un \textit{factor graph} un fattore che è $0$ oppure $1$ viene chiamato \textit{constraint}.
@@ -171,6 +177,26 @@ Ci interessa calcolare la probabilità a posteriori $P(x_n = 1 | \textbf{z}, \te
 		r^v_{mn}= \sum_{g \in \mathcal{G}} P(z_m|x_n = v, \mathcal{G}) \prod_{n' \in \mathcal{N}'(m)} q^{x_{n'}}_{mn'}
 	\end{equation}
 	Esempio per: $n' \in \mathcal{N}'(m)$ (bits che partecipano al check $m$ escluso il bit $n$). Se il check $m$ è la somma dei bit $x_1, x_5, x_7, x_{12}$ allora $\mathcal{N}(m) = \left\{ 1,5,7,12\right\}$ e la produttoria che compare nella formula 5 diventa $q_{m,1}^{x_1} \times q_{m, 7}^{x_7} \times q_{m,12}^{x_{12}}$  
+	\begin{equation*}
+		\begin{tikzpicture}[scale=0.77]
+			\SetUpEdge[lw = 0.2pt, color = gray]
+			\begin{scope}
+				\tikzset{VertexStyle/.append style={rectangle}}
+				\Vertex[L=\textbf{$c_1$},x=2,y=1]{c1}
+				\Vertex[L=$c_2$,x=5,y=1]{c2}
+				\Vertex[L=$\dots$,x=8,y=1]{c3}
+			\end{scope}
+				\Vertex[L=$x_1$,x=1,y=5]{x1}
+				\Vertex[L=$x_7$,x=5,y=5]{x7}
+				\Vertex[L=$x_9$,x=9,y=5]{x9}
+				\Vertex[L=$x_{10}$,x=12,y=5]{x10}
+				\path[->, every node/.style={sloped,anchor=south,auto=false, color=blue}, every path/.style={line width=0.6pt}]
+				 	(c1)  edge[color=blue] node[above] {$r^0_{1,1}$} node[below]{$r^1_{1,1}$} (x1)
+				 	(c1)  edge[color=blue, bend left=5] node[below] {$r^0_{1,7}; r^1_{1,7}$} (x7)
+				 	(c1)  edge[color=blue] node[above] {$r^0_{1,9}$} node[below] {$r^1_{1,7}$} (x9)
+				 	(c1)  edge[color=blue, bend right=10] node[above] {$r^0_{1,10}$} node[below] {$r^1_{1,10}$} (x10);
+		\end{tikzpicture}
+	\end{equation*}
 	\subsubsection{Progressione verticale}
 	La progressione verticale aggiorna le probabilità $q^v_{mn}$ con i valori calcolati di $r^v_{mn}$, ovvero per ogni $n$ si calcola (con $v \in \left\{0,1\right\}$):
 	\begin{equation}
@@ -181,6 +207,26 @@ Ci interessa calcolare la probabilità a posteriori $P(x_n = 1 | \textbf{z}, \te
 	\end{equation}
 	con $q^v_{n}$ rappresentante la pseudo-probabilità a posteriori per il bit $n$ di assumere il valore $v$ e viene utilizzata per il criterio di arresto, ricordando che stiamo cercando $\textbf{Hx}=\textbf{z}$ e che possiamo interrompere l'algoritmo per un $\hat{\textbf{x}}$ quando ci permette di decodificare correttamente la codeword.
 	Dopo aver aggiornato le probabilità l'algoritmo prosegue con il movimento orizzontale.
+	\begin{equation*}
+		\begin{tikzpicture}[scale=0.77]
+			\SetUpEdge[lw = 0.2pt, color = gray]
+			\begin{scope}
+				\tikzset{VertexStyle/.append style={rectangle}}
+				\Vertex[L=$c_1$,x=2,y=1]{c1}
+				\Vertex[L=$c_2$,x=4,y=1]{c3}
+				\Vertex[L=$c_10$,x=10,y=1]{c10}
+			\end{scope}
+				\Vertex[L=$x_1$,x=1,y=5]{x1}
+				\Vertex[L=$x_7$,x=5,y=5]{x7}
+				\Vertex[L=$\dots$,x=9,y=5]{x9}
+				
+				\path[->, every node/.style={sloped,anchor=south,auto=false, color=red}, every path/.style={line width=0.6pt, color=red}]
+				 	(x1)  edge node[above] {$r^0_{1,1}$} node[below]{$r^1_{1,1}$} (c1)
+				 	(x1)  edge[bend left=5] node[above] {$r^0_{1,7}; r^1_{1,7}$} (c3)
+				 	(x1)  edge node[above] {$r^0_{1,9}$} node[below] {$r^1_{1,7}$} (c10);
+		\end{tikzpicture}
+	\end{equation*}
+
 	\subsubsection{Criterio di arresto}
 	Quando $q^1_n >0.5$ è possibile valorizzare $\hat{x}_n$ a 1  e verificare se $\textbf{H}\hat{\textbf{x}}=\textbf{z}$: in tal caso possiamo interrompere, altrimenti è procedediamo finché non troviamo $\hat{\textbf{x}}$ soddifacente o per altre $i$ iterazioni, sollevando un eccezione una volta "sforato" tale limite di iterazioni.
 	\subsubsection{Costi}
