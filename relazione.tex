@@ -8,6 +8,8 @@
 
 \usepackage{tkz-graph}
 
+\usepackage{spreadtab}
+
 \title{LCDP - Codici correttori}
 \date{14 febbraio 2018}
 \author{Saftoiu Vlad Alexandru}
@@ -32,14 +34,54 @@
 	\end{enumerate}
 
 	\section{Introduzione}
-	Un codice LDPC è un codice a blocchi con una matriche di controllo $\textbf{H}$ sparsa ovvero con "pochi" uno su ogni riga e su ogni colonna. Un codice a blocchi è regolare quando, data una matrice $H \in M_{m \times n}$ elementi in $\left\{0,1\right\}$ si ha che:
+	I \textit{Low Density Parity Check codes} sono una classe di codici lineari introdotta per la prima volta da Robert G. Gallager negli anni 1960 che permettono di raggiungere un \textit{rate} di trasmissione delle informazioni tramite un canale rumoroso molto più elevato rispetto agli altri codici di compressione lineari.
+	
+	Un codice LDPC è un codice a blocchi con una matriche di controllo $\textbf{H}$ sparsa ovvero con "pochi" uno su ogni riga e su ogni colonna. Un codice a blocchi è regolare quando, data una matrice $\textbf{H} \in M_{m \times n}$ con elementi in $\left\{0,1\right\}$ si ha che:
 	\begin{equation}
-		  \forall j =1 ... n \quad W_{ham}(H^j) = J 
+		\forall i = 1 ... m \quad W_{ham}(\textbf{H}_i) = K
 	\end{equation}
 	\begin{equation}
-		\forall i = 1 ... m \quad W_{ham}(H_i) = K
+		  \forall j =1 ... n \quad W_{ham}(\textbf{H}^j) = J 
 	\end{equation}
+	
 	Un codice LDPC è un codice ottimo con una buona distanza, a patto di riuscire a costruire un decoder efficiente che, dato l'output $\textbf{r}$ sul canale C, individua la codeword $\textbf{t}$ con la probabilità $P(\textbf{r}|\textbf{t})$ maggiore. Decodificare un codice LDPC è un problema NP-completo, un approcio che possiamo seguire per ottenere un decoder è dato dall'utilizzo dell'algoritmo somme-prodotti a scambio di messaggi.
+	
+	\section{Factor graph}
+		Un \textit{factor graph} è un grafo che rappresenta la fattorizzazione di una funzione, in particolare viene utilizzato per rappresentare i fattori di una distribuzione di probabilità. In un \textit{factor graph} un fattore che è $0$ oppure $1$ viene chiamato \textit{constraint}. 
+		Gli elementi grafici che compaiono sono:
+		\begin{itemize}
+			\item un unico nodo quadrato per ogni fattore $f_k$
+			\item un unico nodo rotondo per ogni variabile $x_i$
+			\item un collegamento tra un nodo variabile $x_i$ e un nodo fattore $f_k$ qualora la variabile $x_i$ compaia nel fattore $f_k$ 
+		\end{itemize}
+		Data una funzione 
+		\begin{equation*}
+			f(u,x,y,z,w)=f_1(x,y) \times f_2(u,x,z) \times f_3(y,w)
+		\end{equation*}
+		il corrispondente factor graph può essere rappresentato come segue:
+		\begin{equation*}
+		\begin{tikzpicture}
+			\SetUpEdge[lw = 0.2pt, color = gray]
+			\begin{scope}
+				\tikzset{VertexStyle/.append style={rectangle}}
+				\Vertex[L=$f_1$,x=2,y=4]{f1}
+				\Vertex[L=$f_2$,x=2,y=0]{f2}
+				\Vertex[L=$f_3$,x=6,y=4]{f3}
+			\end{scope}
+				\Vertex[L=$u$,x=0,y=0]{u}
+				\Vertex[L=$x$,x=2,y=2]{x}
+				\Vertex[L=$y$,x=4,y=4]{y}
+				\Vertex[L=$z$,x=4,y=0]{z}
+				\Vertex[L=$w$,x=6,y=2]{w}
+			\Edge(u)(f2)
+			\Edge(x)(f1)\Edge(x)(f2)
+			\Edge(y)(f1)\Edge(y)(f3)
+			\Edge(z)(f2)
+			\Edge(w)(f3)
+		\end{tikzpicture}
+	\end{equation*}
+		Nel nostro caso tuttavia è più conveniente usare un grafo bipartito, con tutti i nodi variabile da una parte e tutti i nodi fattori dall'altra, come rappresentazione della funzione: $f: \textbf{Hx}=\textbf{z}$
+	
 	\subsection{Esempio}
 	Esempio di una matrice per un codice a blocchi generato casualmente con i seguenti paramentri:
 	\begin{itemize}
@@ -47,7 +89,7 @@
 		\item peso colonne $J  = 3$
 		\item peso righe $K = 4$
 	\end {itemize}
-	La matrice risultante è $H \in M_{12 \times 16}$ elementi in $\left\{0,1\right\}$
+	La matrice risultante è $H \in M_{12 \times 16}$ ad elementi in $\left\{0,1\right\}$
 	\begin{equation} \label{matrix}
 		\begin{smallmatrix}
 			1& & & & & &1& &1&1& & & & & &  \\
@@ -127,32 +169,40 @@
 			\Edge(c12)(x3)\Edge(c12)(x8)\Edge(c12)(x11)\Edge(c12)(x15)
 		\end{tikzpicture}
 	\end{equation*}
-	Nel grafo viene evidenziato il fatto che un \textit{check} effettua la somma di quattro bits ($c_1$ con i collegamenti blu), e un singolo bit del blocco partecipa a tre \textit{checks} ($x_{16}$ con i collegamenti in rosso). Esiste un collegamento tra $c_m$ e $x_n$ quando $\textbf{H}_{mn}=1$
-
-	\section{Factor graph}
-		Un \textit{factor graph} è un grafo bipartito che rappresenta la fattorizzazione di una funzione, in particolare viene utilizzato per rappresentare i fattori di una distribuzione di probabilità. In un \textit{factor graph} un fattore che è $0$ oppure $1$ viene chiamato \textit{constraint}.
-
+	Nel grafo viene evidenziato il fatto che un \textit{check} effettua la somma di quattro bits ($c_1$ con i collegamenti blu), e un singolo bit del blocco partecipa a tre \textit{checks} ($x_{16}$ con i collegamenti in rosso). Esiste un collegamento tra $c_m$ e $x_n$ quando $\textbf{H}_{mn}=1$.
 
 	\section{Algoritmo somme-prodotti a scambio di messaggi}
-Anche conosciuto come \textit{propagation-belief algorithm}, è un algoritmo utilizzato per fare inferenza sulle strutture ad albero (ed in maniera approssimata anche sui grafi) calcolando le probabilità marginali di un modello grafico con N variabili $\bar{x} = (x_1,x_2, ..., x_N)$ a valori su un alfabeto finito $\mathcal{X}$.
-Obiettivo: trovare $\textbf{x}$ che massimizza:
+Anche conosciuto come \textit{propagation-belief algorithm}, è un algoritmo utilizzato per fare inferenza sulle strutture ad albero (ed in maniera approssimata anche sui grafi) calcolando le probabilità marginali di un modello grafico con N variabili $\bar{x} = (x_1,x_2, ..., x_N)$ a valori su un alfabeto finito $\mathcal{X}$. 
+
+	Siano $X, Y$ due variabili aleatorie discrete con mutua informazione $I(X, Y)$ non nulla a valori rispettivamente su alfabeti $\mathcal{X, Y}$ non vuoti e finiti; la probabilità marginale di $X$ è data distribuzione di probabilità $X$ mediata sull'informazione ottenuta da Y. Se $Pr(x,y)$ è la probabilità congiunta e $Pr(x|y)$ è la probabilità di $X=x$ dato che $Y=y$ allora la probabilità marginale per un certo $x$ è data dalla somma delle probabilità congiunte $p(x,y)$ su tutti gli $y$:
+	\begin{equation*}
+		\sum_{y \in Y} Pr(x,y) = \sum_{y \in Y} Pr(x|y) \times Pr(y)
+	\end{equation*}
+	Avendo due variabili aleatorie discrete è facile rappresentare il rapporto tra probabilità congiunta e marginale tramite una tabella di probabilità:
+	\begin{equation*}
+		\begin{spreadtab}{{tabular}{llll|l}}
+          					& @ $x_1$    & @ $x_2$	& @ $x_3$      & @ $p_y(Y)$ \\
+			@ $y_1$   	& 0.11          	& 0.27          	& 0.05         	& sum(b2:d2) \\
+			@ $y_2$  	& 0.15          	& 0.08          	& 0.12         	& sum(b3:d3) \\
+			@ $y_3$  	& 0.15       	& 0.02       	& 0.05        	 & sum(b4:d4) \\ \hline
+          			@ $p_x(X)$	& sum(b2:b4) & sum(c2:c4) & sum(d2:d4) & 1
+		\end{spreadtab}
+	\end{equation*}
+	Dove la probabilità congiunta si trova su ogni cella interna e la probabilità marginale si trova nell'ultima riga e nell'utlima colonna.
+	Nel nostro caso però l'obiettivo è trovare $\textbf{x}$ che massimizza:
 \begin{equation} 
 	P^*(\textbf{x})=P(\textbf{x})\mathbbm{1}[\textbf{Hx} = \textbf{z}]
 \end{equation}
-Ci interessa calcolare la probabilità a posteriori $P(x_n = 1 | \textbf{z}, \textbf{H})$ per ogni bit $x_n$. Nel grafo rappresentante la \textit{parity-check matrix} del nostro codice sono però presenti molti cicli che ci porterebbero a non utilizzare l'algoritmo somme-prodotti per calcolare le probabilità (i risultati sarebbero imprecisi), tuttavia nell'ottica di decodificare la corretta \textit{codeword} non siamo interessati all'esattezza delle probabilità. Il problema da risolvere per la decodifica è trovare 
+ovvero ci interessa calcolare la probabilità a posteriori $P(x_n = 1 | \textbf{z}, \textbf{H})$ per ogni bit $x_n$. Nel grafo rappresentante la \textit{parity-check matrix} del nostro codice sono però presenti molti cicli che ci porterebbero a non utilizzare l'algoritmo somme-prodotti per calcolare le probabilità (i risultati sarebbero imprecisi), tuttavia nell'ottica di decodificare la corretta \textit{codeword} non siamo interessati all'esattezza delle probabilità. Il problema da risolvere per la decodifica è trovare 
 \begin{equation}
 \textbf{Hx} = \textbf{0}  mod_2
-\end{equation}
-	\subsection{Generazione matrice}
-	
-	\subsection{Codifica}
-	
+\end{equation}	
 	\subsection{Decodifica}
-	\subsubsection{Terminologia}
+	\subsubsection{Terminologia utilizzata}
 	\begin{itemize}
-		\item $\mathcal{N}(m) := \left\{ n | H_{mn} = 1 \right\}$ l'insieme degli indici di colonna che hanno uno alla riga m.
-		\item $\mathcal{M}(n) := \left\{ m | H_{mn} = 1 \right\}$ l'insieme degli indici di riga che hanno uno alla colonna n.
-		\item $\mathcal{M}(n)\setminus n$ rappresenta l'esclusione del bit n dall'insieme
+		\item $\mathcal{N}(m) := \left\{ n | H_{mn} = 1 \right\}$ l'insieme degli indici di colonna che hanno il valore \textit{uno} alla riga $m$.
+		\item $\mathcal{M}(n) := \left\{ m | H_{mn} = 1 \right\}$ l'insieme degli indici di riga che hanno il valore \textit{uno} alla colonna $n$.
+		\item $\mathcal{M}(n)\setminus n$ rappresenta l'esclusione del $n$-esimo bit dall'insieme $\mathcal{M}(n)$
 		\item $p_n^0 = P(x_n=0)$ probabilità a priori che il bit $x_n$ sià uguale a 0
 		\item $p_n^1 = P(x_n=1)=1-p_n^0$ probabilità a priori che il bit $x_n$ sià uguale a 1
 		\item $q^x_{mn}$ è la probabilità che il bit $n$ di $\textbf{x}$ abbia il valore $x$
@@ -176,7 +226,9 @@ Ci interessa calcolare la probabilità a posteriori $P(x_n = 1 | \textbf{z}, \te
 	\begin{equation}
 		r^v_{mn}= \sum_{g \in \mathcal{G}} P(z_m|x_n = v, \mathcal{G}) \prod_{n' \in \mathcal{N}'(m)} q^{x_{n'}}_{mn'}
 	\end{equation}
-	Esempio per: $n' \in \mathcal{N}'(m)$ (bits che partecipano al check $m$ escluso il bit $n$). Se il check $m$ è la somma dei bit $x_1, x_5, x_7, x_{12}$ allora $\mathcal{N}(m) = \left\{ 1,5,7,12\right\}$ e la produttoria che compare nella formula 5 diventa $q_{m,1}^{x_1} \times q_{m, 7}^{x_7} \times q_{m,12}^{x_{12}}$  
+	Esempio per: $n' \in \mathcal{N}'(m)$ (bits che partecipano al check $m$ escluso il bit $n$). Se il check $m$ è la somma dei bit $x_1, x_5, x_7, x_{12}$ allora $\mathcal{N}(m) = \left\{ 1,5,7,12\right\}$ e la produttoria che compare nella formula 5 diventa $q_{m,1}^{x_1} \times q_{m, 7}^{x_7} \times q_{m,12}^{x_{12}}$.
+	
+	Graficamente possiamo mostrare questo passaggio individuando i messaggi $r^v_{mn}$ sugli archi uscenti che collegano ogni check $c_i$ ai bit di cui è somma, per ogni $i=1 \dots m$, come segue:
 	\begin{equation*}
 		\begin{tikzpicture}[scale=0.77]
 			\SetUpEdge[lw = 0.2pt, color = gray]
@@ -193,39 +245,51 @@ Ci interessa calcolare la probabilità a posteriori $P(x_n = 1 | \textbf{z}, \te
 				\path[->, every node/.style={sloped,anchor=south,auto=false, color=blue}, every path/.style={line width=0.6pt}]
 				 	(c1)  edge[color=blue] node[above] {$r^0_{1,1}$} node[below]{$r^1_{1,1}$} (x1)
 				 	(c1)  edge[color=blue, bend left=5] node[below] {$r^0_{1,7}; r^1_{1,7}$} (x7)
-				 	(c1)  edge[color=blue] node[above] {$r^0_{1,9}$} node[below] {$r^1_{1,7}$} (x9)
+				 	(c1)  edge[color=blue] node[above] {$r^0_{1,9}$} node[below] {$r^1_{1,9}$} (x9)
 				 	(c1)  edge[color=blue, bend right=10] node[above] {$r^0_{1,10}$} node[below] {$r^1_{1,10}$} (x10);
 		\end{tikzpicture}
 	\end{equation*}
+	Una volta conclusa l'iterazione sugli m \textit{checks} a ciascun bit $x_n$ saranno stati recapitati, se il codice è regolare, lo stesso numero di messaggi ($J=3$) di $r^0_{mn}$ e di $r^1_{mn}$, per esempio relativamente alla matrice al punto \ref{matrix}:
+	\begin{itemize}
+		\item $x_1$ : $\left\{ r^1_{1,1}, r^1_{2,1}, r^1_{10,1}\right\}, \quad \left\{ r^0_{1,1}, r^0_{2,1}, r^0_{10,1}\right\}$
+		\item $x_2$ : $\left\{ r^1_{2,2}, r^1_{5,2}, r^1_{6,2}\right\}, \quad \left\{ r^0_{2,2}, r^0_{5,2}, r^0_{6,2}\right\}$
+		\item $x_3$ : $\dots$
+	\end{itemize}
 	\subsubsection{Progressione verticale}
-	La progressione verticale aggiorna le probabilità $q^v_{mn}$ con i valori calcolati di $r^v_{mn}$, ovvero per ogni $n$ si calcola (con $v \in \left\{0,1\right\}$):
+	La progressione verticale aggiorna le probabilità $q^v_{mn}$ con i valori calcolati (durante la progressione orizzontale) di $r^v_{mn}$, ovvero per ogni $n$ si ricalcolano:
 	\begin{equation}
 		q^v_{mn} = \alpha_{mn} p^v_n \prod_{m' \in \mathcal{M}(n)\setminus m} r^v_{m'n}
 	\end{equation}
 	\begin{equation}
 		q^v_{n} = \alpha_{n} p^v_n \prod_{m \in \mathcal{M}(n)} r^v_{mn}
 	\end{equation}
-	con $q^v_{n}$ rappresentante la pseudo-probabilità a posteriori per il bit $n$ di assumere il valore $v$ e viene utilizzata per il criterio di arresto, ricordando che stiamo cercando $\textbf{Hx}=\textbf{z}$ e che possiamo interrompere l'algoritmo per un $\hat{\textbf{x}}$ quando ci permette di decodificare correttamente la codeword.
-	Dopo aver aggiornato le probabilità l'algoritmo prosegue con il movimento orizzontale.
+	con $v \in \left\{0,1\right\}$. La quantità $q^v_{n}$ rappresenta la pseudo-probabilità a posteriori per il bit $n$ di assumere il valore $v$ e viene utilizzata per il criterio di arresto, ricordando che stiamo cercando $\textbf{Hx}=\textbf{z}$ e che possiamo interrompere l'algoritmo per un $\hat{\textbf{x}}$ quando quest'ultimo ci permette di decodificare correttamente la codeword.
+	Dopo aver aggiornato le probabilità l'algoritmo prosegue ripartendo dal movimento orizzontale.
 	\begin{equation*}
 		\begin{tikzpicture}[scale=0.77]
 			\SetUpEdge[lw = 0.2pt, color = gray]
 			\begin{scope}
 				\tikzset{VertexStyle/.append style={rectangle}}
-				\Vertex[L=$c_1$,x=2,y=1]{c1}
-				\Vertex[L=$c_2$,x=4,y=1]{c3}
-				\Vertex[L=$c_10$,x=10,y=1]{c10}
+				\Vertex[L=$c_1$,x=1,y=1]{c1}
+				\Vertex[L=$c_3$,x=4,y=1]{c3}
+				\Vertex[L=$c_{10}$,x=11,y=1]{c10}
 			\end{scope}
 				\Vertex[L=$x_1$,x=1,y=5]{x1}
-				\Vertex[L=$x_7$,x=5,y=5]{x7}
-				\Vertex[L=$\dots$,x=9,y=5]{x9}
+				\Vertex[L=$x_2$,x=3,y=5]{x2}
+				\Vertex[L=$\dots$,x=5,y=5]{xx}
 				
 				\path[->, every node/.style={sloped,anchor=south,auto=false, color=red}, every path/.style={line width=0.6pt, color=red}]
-				 	(x1)  edge node[above] {$r^0_{1,1}$} node[below]{$r^1_{1,1}$} (c1)
-				 	(x1)  edge[bend left=5] node[above] {$r^0_{1,7}; r^1_{1,7}$} (c3)
-				 	(x1)  edge node[above] {$r^0_{1,9}$} node[below] {$r^1_{1,7}$} (c10);
+				 	(x1)  edge node[above] {$q^0_{1,1} \quad q^1_{1,1}$} (c1)
+				 	(x1)  edge[bend left=5] node[above] {$q^0_{3,1} \quad q^1_{3,1}$} (c3)
+				 	(x1)  edge node[above] {$q^0_{10,1} \quad q^1_{10,1}$} (c10);
 		\end{tikzpicture}
 	\end{equation*}
+	Una volta conclusa l'iterazione sugli $n$ bits a ciascun check $c_m$ saranno stati recapitati, se il codice è regolare, lo stesso numero di messaggi ($K=4$) suddivisi in $q^0_{mn}$ e $q^1_{mn}$, per esempio relativamente alla matrice al punto \ref{matrix}:
+	\begin{itemize}
+		\item $c_1$ : $\left\{ q^1_{1,1}, q^1_{1,7}, q^1_{1,9}, q^1_{1,10}\right\}, \quad \left\{ q^0_{1,1}, q^0_{1,7}, q^0_{1,9}, q^0_{1,10}\right\}$
+		\item $c_2$ : $\left\{ q^1_{2,2}, q^1_{2,6}, q^1_{2,8}, q^1_{2,11}\right\}, \quad \left\{ q^0_{2,2}, q^0_{2,6}, q^0_{2,8}, q^0_{2,11}\right\}$
+		\item $c_3$ : $\dots$
+	\end{itemize}
 
 	\subsubsection{Criterio di arresto}
 	Quando $q^1_n >0.5$ è possibile valorizzare $\hat{x}_n$ a 1  e verificare se $\textbf{H}\hat{\textbf{x}}=\textbf{z}$: in tal caso possiamo interrompere, altrimenti è procedediamo finché non troviamo $\hat{\textbf{x}}$ soddifacente o per altre $i$ iterazioni, sollevando un eccezione una volta "sforato" tale limite di iterazioni.
