@@ -1,0 +1,11 @@
+	\section{Migliorie all'algoritmo}
+
+	Data la natura della matrice \textbf{H} di un codice LDPC è possibile effettuare opportune manipolazioni per migliorare le performance, in particolare:
+
+	\begin{itemize}
+		\item accorpare i bits in gruppi: per esempio creando gruppi di variabili e gruppi di checks con collegamenti solo fra gruppi e non tra i singoli elementi, tenendo presente che creare un gruppo di tre variabili vuol dire considerare gli otto possibili stati dei tre bit osservati;
+		\item rendere il grafo più irregolare: rimuovendo il vincolo di regolarità è possibile avere un numero arbitrario di collegamenti fra variabili e checks, questo può portare a una maggiore resistenza agli errori anche in presenza di molto rumore;
+		\item introdurre check sparsi ridonanti;
+	\end{itemize}
+
+	Le performance migliori si ottengono combinando i primi due punti, ovvero accorpando nodi in cluster e introducendo irregolarità nel peso di righe e colonne di $\textbf{H}$.

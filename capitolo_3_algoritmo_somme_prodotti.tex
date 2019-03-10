@@ -1,0 +1,170 @@
+
+	\section{Algoritmo somme-prodotti a scambio di messaggi}
+
+Anche conosciuto come \textit{propagation-belief algorithm}, è un algoritmo utilizzato per fare inferenza sulle strutture ad albero (ed in maniera approssimata anche sui grafi) calcolando le probabilità marginali di un modello grafico con N variabili $\bar{x} = (x_1,x_2, ..., x_N)$ a valori su un alfabeto finito $\mathcal{X}$. La probabilità marginale è calcolata sui nodi non osservati, condizionale sui nodi osservati.
+
+	Date $X, Y$ due variabili aleatorie discrete con mutua informazione $I(X, Y)$ non nulla a valori rispettivamente su alfabeti $\mathcal{X, Y}$ non vuoti e finiti, la probabilità marginale di $X$ è data distribuzione di probabilità $X$ mediata sull'informazione ottenuta da Y. 
+
+Se $Pr(x,y)$ è la probabilità congiunta e $Pr(x|y)$ è la probabilità di $X=x$ dato che $Y=y$ allora la probabilità marginale per un certo $x$ è data dalla somma delle probabilità congiunte $p(x,y)$ su tutti gli $y$:
+
+	\begin{equation*}
+		\sum_{y \in Y} Pr(x,y) = \sum_{y \in Y} Pr(x|y) \times Pr(y)
+	\end{equation*}
+
+	Avendo due variabili aleatorie discrete è facile rappresentare il rapporto tra probabilità congiunta e marginale tramite una tabella di probabilità:
+
+	\begin{equation*}
+		\begin{spreadtab}{{tabular}{llll|l}}
+          					& @ $x_1$    & @ $x_2$	& @ $x_3$      & @ $p_y(Y)$ \\
+			@ $y_1$   	& 0.11          	& 0.27          	& 0.05         	& sum(b2:d2) \\
+			@ $y_2$  	& 0.15          	& 0.08          	& 0.12         	& sum(b3:d3) \\
+			@ $y_3$  	& 0.15       	& 0.02       	& 0.05        	 & sum(b4:d4) \\ \hline
+          			@ $p_x(X)$	& sum(b2:b4) & sum(c2:c4) & sum(d2:d4) & 1
+		\end{spreadtab}
+	\end{equation*}
+
+	Dove la probabilità congiunta si trova su ogni cella interna e la probabilità marginale si trova nell'ultima riga e nell'ultima colonna.
+
+	Nel nostro caso la probabilità marginale entra in gioco nella ricerca del $\textbf{x}$ che massimizza:
+\begin{equation} 
+	P^*(\textbf{x})=P(\textbf{x})\mathbbm{1}[\textbf{Hx} = \textbf{z}]
+\end{equation}
+con $P(\textbf{x})$ distribuzione separabile sui componenti del vettore $\textbf{x}$ come
+\begin{equation*} P(\textbf{x})=P(x_1)P(x_2)p(x_3)\dots P(x_n) \end{equation*}
+e $\mathbbm{1}$ funzione verità così definita: 
+
+		\begin{equation*}
+			\mathbbm{1}[\textbf{Hx} = \textbf{z}] =
+				\left\{
+					\begin{array}{ll}
+						1  & \mbox{se } Hx=z \\
+						0 & \mbox{altrimenti }
+					\end{array}
+				\right.
+		\end{equation*}
+
+		a seconda dei punti di vista sul grafo possiamo interpretare $\textbf{x}$ come la codeword e $\textbf{z}$ come il vettore nullo, oppure possiamo vedere $\textbf{x}$ come il rumore sul canale e $\textbf{z}$ la sindrome, considerando $\textbf{z}$ come sindrome ci interessa calcolare la probabilità a posteriori $P(x_n = 1 | \textbf{z}, \textbf{H})$ per ogni bit $x_n$. 
+		
+		Nel grafo rappresentante la \textit{parity-check matrix} del nostro codice sono però presenti molti cicli che ci porterebbero a non utilizzare l'algoritmo somme-prodotti per calcolare le probabilità (i risultati sarebbero imprecisi), tuttavia nell'ottica di decodificare la corretta \textit{codeword} non siamo tanto interessati all'esattezza delle probabilità quanto ad avere un buon criterio di arresto che ci permetta di individuare la codeword. 
+		
+		Il problema da risolvere per la decodifica è trovare :
+	\begin{equation}
+		\textbf{Hx} = \textbf{z} \quad mod 2
+	\end{equation}	
+
+\newpage
+
+	\subsection{Terminologia utilizzata}
+	\begin{itemize}
+		\item $\mathcal{N}(m) := \left\{ n | H_{mn} = 1 \right\}$ l'insieme degli indici di colonna che hanno il valore \textit{uno} alla riga $m$;
+		\item $\mathcal{M}(n) := \left\{ m | H_{mn} = 1 \right\}$ l'insieme degli indici di riga che hanno il valore \textit{uno} alla colonna $n$;
+		\item $\mathcal{M}(n)\setminus n$ rappresenta l'esclusione del $n$-esimo bit dall'insieme $\mathcal{M}(n)$;
+		\item $p_n^0 = P(x_n=0)$ probabilità a priori che il bit $x_n$ sià uguale a 0;
+		\item $p_n^1 = P(x_n=1)=1-p_n^0$ probabilità a priori che il bit $x_n$ sià uguale a 1;
+		\item $q^x_{mn}$ è la probabilità che il bit $n$ di $\textbf{x}$ abbia il valore $x$;
+		\item $r^x_{mn}$ è la probabilità che il check $m$ sia "soddisfatto" se il bit $n$ di $\textbf{x}$ abbia il valore fissato su $x$ e gli altri bits hanno una distribuzione separabile data dalle probabilità $\left\{ q_{mn'} | n' \in \mathcal{N}(m)\setminus n\right\}$.
+	\end{itemize}
+	\subsection{Init}
+	Ciascun elemento $H_{mn}$ valorizzato a $1$ mi permette di impostare la corrispondente probabilità a priori $q^0_{mn} = p^0_n$ e $q^1_{mn} = p^1_n$.
+	\subsection{Progressione orizzontale}
+	Il primo step dell'algoritmo percorre orizzontalmente la matrice di controllo ciclando sui checks $m$ e calcolando per ogni bit $x_n$ con $n \in \mathcal{N}(m)$ due probabilità:
+	\begin{itemize}
+		\item $r^0_{mn}$ ovvero la probabilità di osservare il bit $z_m$ dato che $x_n =0$;
+		\item $r^1_{mn}$ cioè la probabilità di osservare il bit $z_m$ ha dato che $x_n =1$.
+	\end{itemize}
+	Se consideriamo:
+	\begin{itemize}
+		\item $\mathcal{N}'(m)=\left\{n' \in \mathcal{N}(m)| n' \neq n\right\} = \mathcal{N}(m) \setminus n$
+		\item $\mathcal{G}=\left\{x_{n'} | \quad n' \in \mathcal{N}'(m) \right\}$ 
+		\item $v \in \left\{0,1\right\}$
+	\end{itemize}
+	allora le due probabilità si possono esprimere come segue:
+	\begin{equation}
+		r^v_{mn}= \sum_{g \in \mathcal{G}} P(z_m|x_n = v, \mathcal{G}) \prod_{n' \in \mathcal{N}'(m)} q^{x_{n'}}_{mn'}
+	\end{equation}
+	Esempio per: $n' \in \mathcal{N}'(m)$ (bits che partecipano al check $m$ escluso il bit $n$). Se il check $m$ è la somma dei bit $x_1, x_5, x_7, x_{12}$ allora $\mathcal{N}(m) = \left\{ 1,5,7,12\right\}$ e la produttoria che compare nella formula 5 diventa $q_{m,1}^{x_1} \times q_{m, 7}^{x_7} \times q_{m,12}^{x_{12}}$.
+	
+	Graficamente possiamo mostrare questo passaggio individuando i messaggi $r^v_{mn}$ sugli archi uscenti che collegano ogni check $c_i$ ai bit di cui è somma, per ogni $i=1 \dots m$, come segue:
+	\begin{equation*}
+		\begin{tikzpicture}[scale=0.77]
+			\SetUpEdge[lw = 0.2pt, color = gray]
+			\begin{scope}
+				\tikzset{VertexStyle/.append style={rectangle}}
+				\Vertex[L=\textbf{$c_1$},x=2,y=1]{c1}
+				\Vertex[L=$c_2$,x=5,y=1]{c2}
+				\Vertex[L=$\dots$,x=8,y=1]{c3}
+			\end{scope}
+				\Vertex[L=$x_1$,x=1,y=5]{x1}
+				\Vertex[L=$x_7$,x=5,y=5]{x7}
+				\Vertex[L=$x_9$,x=9,y=5]{x9}
+				\Vertex[L=$x_{10}$,x=12,y=5]{x10}
+				\path[->, every node/.style={sloped,anchor=south,auto=false, color=blue}, every path/.style={line width=0.6pt}]
+				 	(c1)  edge[color=blue] node[above] {$r^0_{1,1}$} node[below]{$r^1_{1,1}$} (x1)
+				 	(c1)  edge[color=blue, bend left=5] node[below] {$r^0_{1,7}; r^1_{1,7}$} (x7)
+				 	(c1)  edge[color=blue] node[above] {$r^0_{1,9}$} node[below] {$r^1_{1,9}$} (x9)
+				 	(c1)  edge[color=blue, bend right=10] node[above] {$r^0_{1,10}$} node[below] {$r^1_{1,10}$} (x10);
+		\end{tikzpicture}
+	\end{equation*}
+
+	Una volta conclusa l'iterazione sugli m \textit{checks} a ciascun bit $x_n$ saranno stati recapitati, se il codice è regolare, lo stesso numero di messaggi ($J=3$) di $r^0_{mn}$ e di $r^1_{mn}$, per esempio relativamente alla matrice al punto \ref{matrix}:
+
+	\begin{itemize}
+		\item $x_1$ : $\left\{ r^1_{1,1}, r^1_{2,1}, r^1_{10,1}\right\}, \quad \left\{ r^0_{1,1}, r^0_{2,1}, r^0_{10,1}\right\}$
+		\item $x_2$ : $\left\{ r^1_{2,2}, r^1_{5,2}, r^1_{6,2}\right\}, \quad \left\{ r^0_{2,2}, r^0_{5,2}, r^0_{6,2}\right\}$
+		\item $x_3$ : $\dots$
+	\end{itemize}
+
+	\subsection{Progressione verticale}
+	Il secondo step percorre ogni colonna e aggiorna le probabilità $q^v_{mn}$ con i valori $r^v_{mn}$ calcolati durante la progressione orizzontale, ovvero per ogni $n$ si ricalcolano:
+
+	\begin{equation}
+		q^v_{mn} = \alpha_{mn} p^v_n \prod_{m' \in \mathcal{M}(n)\setminus m} r^v_{m'n}
+	\end{equation}
+
+	\begin{equation}
+		q^v_{n} = \alpha_{n} p^v_n \prod_{m \in \mathcal{M}(n)} r^v_{mn}
+	\end{equation}
+
+	con $v \in \left\{0,1\right\}$. La quantità $q^v_{n}$ rappresenta la pseudo-probabilità a posteriori per il bit $n$ di assumere il valore $v$ e viene utilizzata per il criterio di arresto, ricordando che stiamo cercando $\textbf{Hx}=\textbf{z}$ e che possiamo interrompere l'algoritmo per un $\hat{\textbf{x}}$ quando quest'ultimo ci permette di decodificare correttamente la codeword.
+
+	\begin{equation*}
+		\begin{tikzpicture}[scale=0.77]
+			\SetUpEdge[lw = 0.2pt, color = gray]
+			\begin{scope}
+				\tikzset{VertexStyle/.append style={rectangle}}
+				\Vertex[L=$c_1$,x=1,y=1]{c1}
+				\Vertex[L=$c_3$,x=4,y=1]{c3}
+				\Vertex[L=$c_{10}$,x=11,y=1]{c10}
+			\end{scope}
+				\Vertex[L=$x_1$,x=1,y=5]{x1}
+				\Vertex[L=$x_2$,x=3,y=5]{x2}
+				\Vertex[L=$\dots$,x=5,y=5]{xx}
+				
+				\path[->, every node/.style={sloped,anchor=south,auto=false, color=red}, every path/.style={line width=0.6pt, color=red}]
+				 	(x1)  edge node[above] {$q^0_{1,1} \quad q^1_{1,1}$} (c1)
+				 	(x1)  edge[bend left=5] node[above] {$q^0_{3,1} \quad q^1_{3,1}$} (c3)
+				 	(x1)  edge node[above] {$q^0_{10,1} \quad q^1_{10,1}$} (c10);
+		\end{tikzpicture}
+	\end{equation*}
+
+	Una volta conclusa l'iterazione sugli $n$ bits a ciascun check $c_m$ saranno stati recapitati, se il codice è regolare, lo stesso numero di messaggi ($K=4$) suddivisi in $q^0_{mn}$ e $q^1_{mn}$, per esempio relativamente alla matrice al punto \ref{matrix}:
+
+	\begin{itemize}
+		\item $c_1$ : $\left\{ q^1_{1,1}, q^1_{1,7}, q^1_{1,9}, q^1_{1,10}\right\}, \quad \left\{ q^0_{1,1}, q^0_{1,7}, q^0_{1,9}, q^0_{1,10}\right\}$
+		\item $c_2$ : $\left\{ q^1_{2,2}, q^1_{2,6}, q^1_{2,8}, q^1_{2,11}\right\}, \quad \left\{ q^0_{2,2}, q^0_{2,6}, q^0_{2,8}, q^0_{2,11}\right\}$
+		\item $c_3$ : $\dots$
+	\end{itemize}
+
+	Dopo aver aggiornato le probabilità l'algoritmo prosegue ripartendo dal movimento orizzontale.
+	
+	\subsection{Criterio di arresto}
+
+	Quando $q^1_n >0.5$ è possibile valorizzare $\hat{x}_n$ a 1  e verificare se $\textbf{H}\hat{\textbf{x}}=\textbf{z}$: in tal caso possiamo interrompere, altrimenti è procedediamo finché non troviamo $\hat{\textbf{x}}$ soddifacente o per altre $i$ iterazioni, sollevando un eccezione una volta "sforato" tale limite di iterazioni, tale limite verrà sorpassato soltanto in presenza di canali estremamente rumorosi.
+
+	\subsection{Costi}
+
+	\begin{itemize}
+		\item matrice \textbf{H} -  ci sono diversi metodi per generare matrici sparse, \textit{bit-filling algorithm}, \textit{progressive edge-growth} ma al limite si arriva su valori di $\approx N^3$
+		\item \textbf{codifica} - $\approx N^2$ operazioni binarie aritmetiche
+		\item \textbf{decodifica} - l'algoritmo di decodifica si compone di $6 \times N \times j \times n_{iterazioni} $ a prescindere dalla lunghezza dei blocchi
+	\end{itemize}

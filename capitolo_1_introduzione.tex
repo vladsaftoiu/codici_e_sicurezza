@@ -1,0 +1,29 @@
+\section{Introduzione}
+	
+	\subsection{Comunicazione su canali rumorosi}
+	
+	L'argomento della comunicazione affidabile tramite canali rumorosi è stata trattata in maniera approfondita da Claude E. Shannon, in particolare è di grande importanza l'omonimo teorema \textit{Shannon's coding theorem} che collega la capacità di un canale \textit{Ch} al rate di trasmissione dell'informazione, ovvero al rapporto $\frac{K}{N}$ tra i $K$ bit di informazione utile e l'utilizzo del canale (numero di bit trasmessi $N$). In particolare è verificato che per un $N$ \textit{sufficientemente} grande è possibile circoscrivere la probabilità di errore entro un arbitrario $\varepsilon$ fissato. Tuttavia aumentando la dimensione $N$ dei blocchi si ha anche, nel caso di codici a blocchi non sparsi, un aumento di ordine quadratico del numero di nodi del grafo associato alla matrice di parity check, che comporta un notevole impiego di risorse durante la fase di decodifica.
+	
+	\subsection {Low Density Parity Check codes}
+	
+	I \textit{LDPC} sono una classe di codici lineari introdotta per la prima volta da Robert G. Gallager negli anni 1960 che permettono di raggiungere un \textit{rate} di trasmissione delle informazioni tramite un canale rumoroso molto buone aumentando la dimensione dei blocchi senza pesare eccessivamente sull'algoritmo di decodifica.
+	
+	Un codice \textit{LDPC} è un codice a blocchi con una matriche di controllo $\textbf{H}$ sparsa ovvero con "pochi" uno su ogni riga e su ogni colonna (il numero dei checks può addirittura rimanere invariato al crescere di N). Un codice a blocchi è regolare quando, data una matrice $\textbf{H} \in M_{m \times n}$ con elementi in $\left\{0,1\right\}$ si ha che:
+	\begin{equation}
+		\forall i = 1 ... m \quad W_{ham}(\textbf{H}_i) = K
+	\end{equation}
+	\begin{equation}
+		  \forall j =1 ... n \quad W_{ham}(\textbf{H}^j) = J 
+	\end{equation}
+	
+	La famiglia dei codici LDPC ha una buona distanza $d$, ovvero il rapporto $d/N$ tende a una costante maggiore di zero, considerando $N$ come lunghezza del blocco. Il problema è riuscire a costruire un decoder efficiente che, dato l'output $\textbf{r}$ sul canale C, individua la codeword $\textbf{t}$ con la probabilità $P(\textbf{r}|\textbf{t})$ maggiore. 
+
+Decodificare un codice LDPC è un problema NP-completo, un approccio che possiamo seguire per ottenere un decoder è dato dall'utilizzo dell'algoritmo somme-prodotti a scambio di messaggi.
+
+	Le caratteristiche principali dei codici LDPC sono: 
+	\begin{itemize}
+		\item si possono implementare per un N arbitrario;
+		\item la complessità legata alla decodifica è relativamente bassa;
+		\item sono di facile implementazione;
+		\item c'è un buon rapporto errori / blocco.
+	\end{itemize}
